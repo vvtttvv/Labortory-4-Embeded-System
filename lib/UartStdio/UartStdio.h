@@ -1,12 +1,16 @@
-#ifndef UART_STDIO_H
-#define UART_STDIO_H
+#pragma once
 
 #include <Arduino.h>
 #include <stdio.h>
 
-namespace UartStdio
-{
-    void init(unsigned long baud = 9600);
-}
+class UartStdio {
+public:
+	static void init(unsigned long baud = 9600);
 
-#endif
+private:
+	static int uart_putchar(char c, FILE* stream);
+	static int uart_getchar(FILE* stream);
+
+	static FILE uart_out;
+	static FILE uart_in;
+};

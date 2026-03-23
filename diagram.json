@@ -1,94 +1,53 @@
 {
   "version": 1,
-  "author": "Uri Shaked",
+  "author": "Lab7",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-breadboard-half", "id": "bb1", "top": -147, "left": 406, "attrs": {} },
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 67.8, "left": -48.6, "attrs": {} },
-    {
-      "type": "wokwi-resistor",
-      "id": "r1",
-      "top": -52.8,
-      "left": 460.25,
-      "rotate": 90,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "r3",
-      "top": -52.8,
-      "left": 431.45,
-      "rotate": 90,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "led7",
-      "top": -138,
-      "left": 435.8,
-      "attrs": { "color": "yellow" }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "led8",
-      "top": -138,
-      "left": 464.6,
-      "attrs": { "color": "green" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn2",
-      "top": -67.8,
-      "left": 655.8,
-      "rotate": 90,
-      "attrs": { "color": "cyan", "key": "5" }
-    },
-    { "type": "wokwi-led", "id": "led1", "top": -138, "left": 503, "attrs": { "color": "red" } },
-    {
-      "type": "wokwi-resistor",
-      "id": "r2",
-      "top": -52.8,
-      "left": 498.65,
-      "rotate": 90,
-      "attrs": { "value": "220" }
-    }
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 120, "left": 20, "attrs": {} },
+
+    { "type": "wokwi-relay-module", "id": "relay1", "top": -40, "left": 300, "attrs": { "transistor": "npn" } },
+    { "type": "wokwi-led", "id": "lamp1", "top": -90, "left": 500, "attrs": { "color": "red" } },
+    { "type": "wokwi-resistor", "id": "rLamp", "top": -10, "left": 510, "rotate": 90, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-servo", "id": "motor1", "top": 150, "left": 380, "attrs": { "horn": "disc" } },
+
+    { "type": "wokwi-led", "id": "dirFwdLed", "top": -90, "left": 620, "attrs": { "color": "green" } },
+    { "type": "wokwi-resistor", "id": "rFwd", "top": -10, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-led", "id": "dirRevLed", "top": -90, "left": 700, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-resistor", "id": "rRev", "top": -10, "left": 710, "rotate": 90, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-led", "id": "pwmLed", "top": 40, "left": 620, "attrs": { "color": "blue" } },
+    { "type": "wokwi-resistor", "id": "rPwm", "top": 120, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-text", "id": "txt1", "top": -150, "left": 290, "attrs": { "text": "Binary actuator: relay + lamp" } },
+    { "type": "wokwi-text", "id": "txt2", "top": 80, "left": 370, "attrs": { "text": "Analog actuator (sim): servo on PWM D5" } }
   ],
   "connections": [
-    [ "uno:GND.1", "lcd:VSS", "black", [ "v-51", "*", "h0", "v18" ] ],
-    [ "uno:GND.1", "lcd:K", "black", [ "v-51", "*", "h0", "v18" ] ],
-    [ "uno:GND.1", "lcd:RW", "black", [ "v-51", "*", "h0", "v18" ] ],
-    [ "uno:5V", "lcd:VDD", "red", [ "v16", "h-16" ] ],
-    [ "uno:12", "lcd:RS", "blue", [ "v-16", "*", "h0", "v20" ] ],
-    [ "uno:11", "lcd:E", "purple", [ "v-20", "*", "h0", "v20" ] ],
-    [ "uno:10", "lcd:D4", "green", [ "v-24", "*", "h0", "v20" ] ],
-    [ "uno:9", "lcd:D5", "brown", [ "v-28", "*", "h0", "v20" ] ],
-    [ "uno:8", "lcd:D6", "gold", [ "v-32", "*", "h0", "v20" ] ],
-    [ "uno:7", "lcd:D7", "gray", [ "v-36", "*", "h0", "v20" ] ],
-    [ "uno:GND.1", "bb1:tn.1", "black", [ "v0" ] ],
-    [ "led7:C", "bb1:tn.2", "green", [ "v0" ] ],
-    [ "led8:C", "bb1:tn.5", "green", [ "v0" ] ],
-    [ "bb1:4b.j", "uno:12", "green", [ "v19.2", "h-374.4" ] ],
-    [ "bb1:7b.i", "uno:13", "magenta", [ "v19.2", "h-412.8" ] ],
-    [ "bb1:29b.j", "uno:2", "green", [ "v134.4", "h-518.4" ] ],
-    [ "bb1:27b.j", "bb1:tn.22", "green", [ "v0" ] ],
-    [ "r3:1", "bb1:4t.c", "", [ "$bb" ] ],
-    [ "r3:2", "bb1:4b.g", "", [ "$bb" ] ],
-    [ "led7:A", "bb1:4t.a", "", [ "$bb" ] ],
-    [ "led7:C", "bb1:3t.a", "", [ "$bb" ] ],
-    [ "btn2:1.l", "bb1:29t.c", "", [ "$bb" ] ],
-    [ "btn2:2.l", "bb1:27t.c", "", [ "$bb" ] ],
-    [ "btn2:1.r", "bb1:29b.h", "", [ "$bb" ] ],
-    [ "btn2:2.r", "bb1:27b.h", "", [ "$bb" ] ],
-    [ "led8:A", "bb1:7t.a", "", [ "$bb" ] ],
-    [ "led8:C", "bb1:6t.a", "", [ "$bb" ] ],
-    [ "led1:A", "bb1:11t.a", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:10t.a", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:tn.8", "black", [ "v0" ] ],
-    [ "r1:1", "bb1:7t.c", "", [ "$bb" ] ],
-    [ "r1:2", "bb1:7b.g", "", [ "$bb" ] ],
-    [ "bb1:11b.h", "uno:8", "green", [ "v48", "h-422.4" ] ],
-    [ "r2:1", "bb1:11t.c", "", [ "$bb" ] ],
-    [ "r2:2", "bb1:11b.g", "", [ "$bb" ] ]
+    [ "uno:13", "relay1:IN", "red", [ "v-80", "h235" ] ],
+    [ "uno:5V", "relay1:VCC", "red", [ "v-90", "h220" ] ],
+    [ "uno:GND.1", "relay1:GND", "black", [ "v-70", "h210" ] ],
+
+    [ "uno:5V", "relay1:COM", "orange", [ "v-110", "h340" ] ],
+    [ "relay1:NO", "lamp1:A", "orange", [ "h65", "v-20" ] ],
+    [ "lamp1:C", "rLamp:1", "black", [ "h0" ] ],
+    [ "rLamp:2", "uno:GND.2", "black", [ "v70", "h-480" ] ],
+
+    [ "uno:5", "motor1:PWM", "blue", [ "v-20", "h330" ] ],
+    [ "uno:5V", "motor1:V+", "red", [ "v-100", "h250" ] ],
+    [ "uno:GND.2", "motor1:GND", "black", [ "v-70", "h260" ] ],
+
+    [ "uno:4", "dirFwdLed:A", "green", [ "h0" ] ],
+    [ "dirFwdLed:C", "rFwd:1", "black", [ "h0" ] ],
+    [ "rFwd:2", "uno:GND.2", "black", [ "h0" ] ],
+
+    [ "uno:3", "dirRevLed:A", "yellow", [ "h0" ] ],
+    [ "dirRevLed:C", "rRev:1", "black", [ "h0" ] ],
+    [ "rRev:2", "uno:GND.2", "black", [ "h0" ] ],
+
+    [ "uno:5", "pwmLed:A", "blue", [ "h0" ] ],
+    [ "pwmLed:C", "rPwm:1", "black", [ "h0" ] ],
+    [ "rPwm:2", "uno:GND.2", "black", [ "h0" ] ]
   ],
   "dependencies": {}
 }

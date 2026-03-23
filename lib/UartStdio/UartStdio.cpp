@@ -1,20 +1,23 @@
 #include "UartStdio.h"
 
-static FILE uart_out;
-static FILE uart_in;
+FILE UartStdio::uart_out;
+FILE UartStdio::uart_in;
 
-static int uart_putchar(char c, FILE *)
+int UartStdio::uart_putchar(char c, FILE* stream)
 {
-    if (c == '\n')
+    (void)stream;
+    if (c == '\n') {
         Serial.write('\r');
+    }
     Serial.write(c);
     return 0;
 }
 
-static int uart_getchar(FILE *)
+int UartStdio::uart_getchar(FILE* stream)
 {
-    while (!Serial.available())
-        ;
+    (void)stream;
+    while (!Serial.available()) {
+    }
     return Serial.read();
 }
 
