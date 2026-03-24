@@ -3,27 +3,49 @@
   "author": "Lab7",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 120, "left": 20, "attrs": {} },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 170, "left": -10, "attrs": {} },
 
-    { "type": "wokwi-relay-module", "id": "relay1", "top": -40, "left": 300, "attrs": { "transistor": "npn" } },
-    { "type": "wokwi-led", "id": "lamp1", "top": -90, "left": 500, "attrs": { "color": "red" } },
-    { "type": "wokwi-resistor", "id": "rLamp", "top": -10, "left": 510, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-lcd1602", "id": "lcd1", "top": -200, "left": -10, "attrs": { "pins": "full" } },
+    { "type": "wokwi-membrane-keypad", "id": "kp1", "top": -190, "left": 360, "attrs": {} },
 
-    { "type": "wokwi-servo", "id": "motor1", "top": 150, "left": 380, "attrs": { "horn": "disc" } },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 80, "left": 380, "attrs": { "transistor": "npn" } },
+    { "type": "wokwi-led", "id": "lamp1", "top": 40, "left": 620, "attrs": { "color": "red" } },
+    { "type": "wokwi-resistor", "id": "rLamp", "top": 120, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
 
-    { "type": "wokwi-led", "id": "dirFwdLed", "top": -90, "left": 620, "attrs": { "color": "green" } },
-    { "type": "wokwi-resistor", "id": "rFwd", "top": -10, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-servo", "id": "motor1", "top": 280, "left": 420, "attrs": { "horn": "disc" } },
 
-    { "type": "wokwi-led", "id": "dirRevLed", "top": -90, "left": 700, "attrs": { "color": "yellow" } },
-    { "type": "wokwi-resistor", "id": "rRev", "top": -10, "left": 710, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "dirFwdLed", "top": 40, "left": 720, "attrs": { "color": "green" } },
+    { "type": "wokwi-resistor", "id": "rFwd", "top": 120, "left": 730, "rotate": 90, "attrs": { "value": "220" } },
 
-    { "type": "wokwi-led", "id": "pwmLed", "top": 40, "left": 620, "attrs": { "color": "blue" } },
-    { "type": "wokwi-resistor", "id": "rPwm", "top": 120, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "dirRevLed", "top": 40, "left": 790, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-resistor", "id": "rRev", "top": 120, "left": 800, "rotate": 90, "attrs": { "value": "220" } },
 
-    { "type": "wokwi-text", "id": "txt1", "top": -150, "left": 290, "attrs": { "text": "Binary actuator: relay + lamp" } },
-    { "type": "wokwi-text", "id": "txt2", "top": 80, "left": 370, "attrs": { "text": "Analog actuator (sim): servo on PWM D5" } }
+    { "type": "wokwi-led", "id": "pwmLed", "top": 220, "left": 720, "attrs": { "color": "blue" } },
+    { "type": "wokwi-resistor", "id": "rPwm", "top": 300, "left": 730, "rotate": 90, "attrs": { "value": "220" } }
   ],
   "connections": [
+    [ "uno:GND.1", "lcd1:VSS", "black", [ "v-60", "h20", "v-190" ] ],
+    [ "uno:5V", "lcd1:VDD", "red", [ "v-80", "h0", "v-180" ] ],
+    [ "uno:GND.1", "lcd1:V0", "black", [ "v-60", "h35", "v-190" ] ],
+    [ "uno:GND.1", "lcd1:RW", "black", [ "v-60", "h45", "v-190" ] ],
+    [ "uno:12", "lcd1:RS", "green", [ "v-30", "h-50", "v-150" ] ],
+    [ "uno:11", "lcd1:E", "green", [ "v-35", "h-40", "v-150" ] ],
+    [ "uno:10", "lcd1:D4", "green", [ "v-40", "h-30", "v-150" ] ],
+    [ "uno:9", "lcd1:D5", "green", [ "v-45", "h-20", "v-150" ] ],
+    [ "uno:8", "lcd1:D6", "green", [ "v-50", "h-10", "v-150" ] ],
+    [ "uno:7", "lcd1:D7", "green", [ "v-55", "h0", "v-150" ] ],
+    [ "uno:5V", "lcd1:A", "red", [ "v-90", "h10", "v-180" ] ],
+    [ "uno:GND.1", "lcd1:K", "black", [ "v-60", "h55", "v-190" ] ],
+
+    [ "uno:A0", "kp1:R1", "purple", [ "v40", "h360", "v-360" ] ],
+    [ "uno:A1", "kp1:R2", "purple", [ "v35", "h350", "v-350" ] ],
+    [ "uno:A2", "kp1:R3", "purple", [ "v30", "h340", "v-340" ] ],
+    [ "uno:A3", "kp1:R4", "purple", [ "v25", "h330", "v-330" ] ],
+    [ "uno:A4", "kp1:C1", "blue", [ "v20", "h320", "v-320" ] ],
+    [ "uno:A5", "kp1:C2", "blue", [ "v15", "h310", "v-310" ] ],
+    [ "uno:2", "kp1:C3", "blue", [ "v10", "h300", "v-300" ] ],
+    [ "uno:6", "kp1:C4", "blue", [ "v5", "h290", "v-290" ] ],
+
     [ "uno:13", "relay1:IN", "red", [ "v-80", "h235" ] ],
     [ "uno:5V", "relay1:VCC", "red", [ "v-90", "h220" ] ],
     [ "uno:GND.1", "relay1:GND", "black", [ "v-70", "h210" ] ],
