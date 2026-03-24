@@ -3,73 +3,129 @@
   "author": "Lab7",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 170, "left": -10, "attrs": {} },
-
-    { "type": "wokwi-lcd1602", "id": "lcd1", "top": -200, "left": -10, "attrs": { "pins": "full" } },
-    { "type": "wokwi-membrane-keypad", "id": "kp1", "top": -190, "left": 360, "attrs": {} },
-
-    { "type": "wokwi-relay-module", "id": "relay1", "top": 80, "left": 380, "attrs": { "transistor": "npn" } },
-    { "type": "wokwi-led", "id": "lamp1", "top": 40, "left": 620, "attrs": { "color": "red" } },
-    { "type": "wokwi-resistor", "id": "rLamp", "top": 120, "left": 630, "rotate": 90, "attrs": { "value": "220" } },
-
-    { "type": "wokwi-servo", "id": "motor1", "top": 280, "left": 420, "attrs": { "horn": "disc" } },
-
-    { "type": "wokwi-led", "id": "dirFwdLed", "top": 40, "left": 720, "attrs": { "color": "green" } },
-    { "type": "wokwi-resistor", "id": "rFwd", "top": 120, "left": 730, "rotate": 90, "attrs": { "value": "220" } },
-
-    { "type": "wokwi-led", "id": "dirRevLed", "top": 40, "left": 790, "attrs": { "color": "yellow" } },
-    { "type": "wokwi-resistor", "id": "rRev", "top": 120, "left": 800, "rotate": 90, "attrs": { "value": "220" } },
-
-    { "type": "wokwi-led", "id": "pwmLed", "top": 220, "left": 720, "attrs": { "color": "blue" } },
-    { "type": "wokwi-resistor", "id": "rPwm", "top": 300, "left": 730, "rotate": 90, "attrs": { "value": "220" } }
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 173.4, "left": -10.2, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -178.97,
+      "left": 35.2,
+      "attrs": { "pins": "full" }
+    },
+    { "type": "wokwi-membrane-keypad", "id": "kp1", "top": -328.4, "left": 408.8, "attrs": {} },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay1",
+      "top": 19.4,
+      "left": 268.8,
+      "attrs": { "transistor": "npn" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "lamp1",
+      "top": 6,
+      "left": 599.4,
+      "attrs": { "color": "red", "flip": "1" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rLamp",
+      "top": 110.4,
+      "left": 604.25,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "motor1",
+      "top": 468.4,
+      "left": 470.4,
+      "attrs": { "horn": "disc" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "dirFwdLed",
+      "top": 40,
+      "left": 720,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rFwd",
+      "top": 110.4,
+      "left": 700.25,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "dirRevLed",
+      "top": 40,
+      "left": 790,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rRev",
+      "top": 120,
+      "left": 767.45,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "pwmLed",
+      "top": 140.4,
+      "left": 839.4,
+      "attrs": { "color": "blue", "flip": "1" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rPwm",
+      "top": 302.4,
+      "left": 834.65,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    }
   ],
   "connections": [
-    [ "uno:GND.1", "lcd1:VSS", "black", [ "v-60", "h20", "v-190" ] ],
-    [ "uno:5V", "lcd1:VDD", "red", [ "v-80", "h0", "v-180" ] ],
-    [ "uno:GND.1", "lcd1:V0", "black", [ "v-60", "h35", "v-190" ] ],
-    [ "uno:GND.1", "lcd1:RW", "black", [ "v-60", "h45", "v-190" ] ],
-    [ "uno:12", "lcd1:RS", "green", [ "v-30", "h-50", "v-150" ] ],
-    [ "uno:11", "lcd1:E", "green", [ "v-35", "h-40", "v-150" ] ],
-    [ "uno:10", "lcd1:D4", "green", [ "v-40", "h-30", "v-150" ] ],
-    [ "uno:9", "lcd1:D5", "green", [ "v-45", "h-20", "v-150" ] ],
-    [ "uno:8", "lcd1:D6", "green", [ "v-50", "h-10", "v-150" ] ],
-    [ "uno:7", "lcd1:D7", "green", [ "v-55", "h0", "v-150" ] ],
-    [ "uno:5V", "lcd1:A", "red", [ "v-90", "h10", "v-180" ] ],
-    [ "uno:GND.1", "lcd1:K", "black", [ "v-60", "h55", "v-190" ] ],
-
-    [ "uno:A0", "kp1:R1", "purple", [ "v40", "h360", "v-360" ] ],
-    [ "uno:A1", "kp1:R2", "purple", [ "v35", "h350", "v-350" ] ],
-    [ "uno:A2", "kp1:R3", "purple", [ "v30", "h340", "v-340" ] ],
-    [ "uno:A3", "kp1:R4", "purple", [ "v25", "h330", "v-330" ] ],
-    [ "uno:A4", "kp1:C1", "blue", [ "v20", "h320", "v-320" ] ],
-    [ "uno:A5", "kp1:C2", "blue", [ "v15", "h310", "v-310" ] ],
-    [ "uno:2", "kp1:C3", "blue", [ "v10", "h300", "v-300" ] ],
-    [ "uno:6", "kp1:C4", "blue", [ "v5", "h290", "v-290" ] ],
-
-    [ "uno:13", "relay1:IN", "red", [ "v-80", "h235" ] ],
-    [ "uno:5V", "relay1:VCC", "red", [ "v-90", "h220" ] ],
-    [ "uno:GND.1", "relay1:GND", "black", [ "v-70", "h210" ] ],
-
-    [ "uno:5V", "relay1:COM", "orange", [ "v-110", "h340" ] ],
-    [ "relay1:NO", "lamp1:A", "orange", [ "h65", "v-20" ] ],
-    [ "lamp1:C", "rLamp:1", "black", [ "h0" ] ],
+    [ "uno:GND.1", "lcd1:VSS", "black", [ "v-60", "h-38.3", "v-320.6" ] ],
+    [ "uno:5V", "lcd1:VDD", "red", [ "h-6", "v147.3", "h-67.2", "v-710.4" ] ],
+    [ "uno:GND.1", "lcd1:V0", "black", [ "v-60", "h-19.1", "v-320.6" ] ],
+    [ "uno:GND.1", "lcd1:RW", "black", [ "v-60", "h0.1", "v-320.6" ] ],
+    [ "uno:12", "lcd1:RS", "green", [ "v-30", "h-28.5", "v-350.6" ] ],
+    [ "uno:11", "lcd1:E", "green", [ "v-35", "h-18.8", "v-345.6" ] ],
+    [ "uno:10", "lcd1:D4", "green", [ "v-40", "h19.7", "v-340.6" ] ],
+    [ "uno:9", "lcd1:D5", "green", [ "v-45", "h19.8", "v-335.6" ] ],
+    [ "uno:8", "lcd1:D6", "green", [ "v-50", "h19.4", "v-330.6" ] ],
+    [ "uno:7", "lcd1:D7", "green", [ "h13", "v-325.6" ] ],
+    [ "uno:5V", "lcd1:A", "red", [ "v-342.3", "h51.6", "v-220.8" ] ],
+    [ "uno:A0", "kp1:R1", "purple", [ "v40", "h310.8", "v-439.9" ] ],
+    [ "uno:A1", "kp1:R2", "purple", [ "v35", "h310.9", "v-434.9" ] ],
+    [ "uno:A2", "kp1:R3", "purple", [ "v30", "h311", "v-429.9" ] ],
+    [ "uno:A3", "kp1:R4", "purple", [ "v25", "h311.1", "v-424.9" ] ],
+    [ "uno:A4", "kp1:C1", "blue", [ "v20", "h311.2", "v-419.9" ] ],
+    [ "uno:A5", "kp1:C2", "blue", [ "v15", "h311.3", "v-414.9" ] ],
+    [ "uno:2", "kp1:C3", "blue", [ "v3.4", "h339.9", "v-220.8" ] ],
+    [ "uno:6", "kp1:C4", "blue", [ "v80.2", "h387.5", "v-297.6" ] ],
+    [ "uno:13", "relay1:IN", "red", [ "v-80", "h0.2", "v-41.2" ] ],
+    [ "uno:5V", "relay1:VCC", "red", [ "v-90", "h3.6", "v-233.1" ] ],
+    [ "uno:GND.1", "relay1:GND", "black", [ "v-131", "h163.3" ] ],
+    [ "uno:5V", "relay1:COM", "orange", [ "v-0.1", "h272.4", "v-315.4" ] ],
+    [ "relay1:NO", "lamp1:A", "orange", [ "h231.6", "v-11.4" ] ],
+    [ "lamp1:C", "rLamp:1", "black", [ "h9.2", "v38.4" ] ],
     [ "rLamp:2", "uno:GND.2", "black", [ "v70", "h-480" ] ],
-
-    [ "uno:5", "motor1:PWM", "blue", [ "v-20", "h330" ] ],
-    [ "uno:5V", "motor1:V+", "red", [ "v-100", "h250" ] ],
-    [ "uno:GND.2", "motor1:GND", "black", [ "v-70", "h260" ] ],
-
-    [ "uno:4", "dirFwdLed:A", "green", [ "h0" ] ],
+    [ "uno:5", "motor1:PWM", "blue", [ "h3.6", "v358.6", "h19.2", "v-0.2" ] ],
+    [ "uno:5V", "motor1:V+", "red", [ "v166.5", "h3.6", "v-0.1" ] ],
+    [ "uno:GND.2", "motor1:GND", "black", [ "v156.9", "h13.3" ] ],
+    [ "uno:4", "dirFwdLed:A", "green", [ "v13", "h537.5" ] ],
     [ "dirFwdLed:C", "rFwd:1", "black", [ "h0" ] ],
     [ "rFwd:2", "uno:GND.2", "black", [ "h0" ] ],
-
-    [ "uno:3", "dirRevLed:A", "yellow", [ "h0" ] ],
+    [ "uno:3", "dirRevLed:A", "yellow", [ "v22.6", "h598" ] ],
     [ "dirRevLed:C", "rRev:1", "black", [ "h0" ] ],
     [ "rRev:2", "uno:GND.2", "black", [ "h0" ] ],
-
-    [ "uno:5", "pwmLed:A", "blue", [ "h0" ] ],
+    [ "uno:5", "pwmLed:A", "blue", [ "v32.2", "h522" ] ],
     [ "pwmLed:C", "rPwm:1", "black", [ "h0" ] ],
-    [ "rPwm:2", "uno:GND.2", "black", [ "h0" ] ]
+    [ "rPwm:2", "uno:GND.2", "black", [ "v56.4", "h-570.1" ] ]
   ],
   "dependencies": {}
 }
