@@ -10,6 +10,7 @@ public:
         Status,
         BinOn,
         BinOff,
+        MotPos,
         MotSpd,
         MotDirFwd,
         MotDirRev,

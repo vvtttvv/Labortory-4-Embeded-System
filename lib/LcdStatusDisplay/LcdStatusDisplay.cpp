@@ -37,7 +37,7 @@ void LcdStatusDisplay::showBoot()
     g_lcd->print("Init...");
 }
 
-void LcdStatusDisplay::showStatus(bool binaryOn, bool motorForward, int motorRawPercent, int motorAppliedPercent, bool limitAlert)
+void LcdStatusDisplay::showStatus(bool binaryOn, int motorRawPercent, int motorAppliedPercent, int motorSpeedPercent, bool limitAlert)
 {
     if (!initialized_ || g_lcd == nullptr) {
         return;
@@ -49,14 +49,14 @@ void LcdStatusDisplay::showStatus(bool binaryOn, bool motorForward, int motorRaw
     snprintf(
         line1,
         sizeof(line1),
-        "B:%s D:%s",
+        "B:%s S:%3d",
         binaryOn ? "ON " : "OFF",
-        motorForward ? "FWD" : "REV");
+        motorSpeedPercent);
 
     snprintf(
         line2,
         sizeof(line2),
-        "R:%3d A:%3d %c",
+        "P:%3d A:%3d %c",
         motorRawPercent,
         motorAppliedPercent,
         limitAlert ? 'L' : ' ');

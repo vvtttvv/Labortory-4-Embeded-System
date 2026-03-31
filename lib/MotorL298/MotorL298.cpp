@@ -10,7 +10,11 @@ void MotorL298::init(uint8_t in1Pin, uint8_t in2Pin, uint8_t enPinPwm)
 
     pinMode(in1Pin_, OUTPUT);
     pinMode(in2Pin_, OUTPUT);
-    pinMode(enPinPwm_, OUTPUT);
+    digitalWrite(in1Pin_, LOW);
+    digitalWrite(in2Pin_, LOW);
+
+    servo_.attach(enPinPwm_);
+    servoAttached_ = true;
 
     direction_ = Forward;
     targetPercent_ = 0;
@@ -21,7 +25,6 @@ void MotorL298::init(uint8_t in1Pin, uint8_t in2Pin, uint8_t enPinPwm)
 void MotorL298::setDirection(Direction dir)
 {
     direction_ = dir;
-    applyOutput();
 }
 
 void MotorL298::setTargetPercent(int percent)
@@ -52,21 +55,10 @@ int MotorL298::getAppliedPercent() const
 
 void MotorL298::applyOutput()
 {
-    if (appliedPercent_ <= 0) {
-        digitalWrite(in1Pin_, LOW);
-        digitalWrite(in2Pin_, LOW);
-        analogWrite(enPinPwm_, 0);
+    if (!servoAttached_) {
         return;
     }
 
-    if (direction_ == Forward) {
-        digitalWrite(in1Pin_, HIGH);
-        digitalWrite(in2Pin_, LOW);
-    } else {
-        digitalWrite(in1Pin_, LOW);
-        digitalWrite(in2Pin_, HIGH);
-    }
-
-    const int pwm = map(appliedPercent_, 0, 100, 0, 255);
-    analogWrite(enPinPwm_, pwm);
+    const int angle = map(appliedPercent_, 0, 100, 0, 180);
+    servo_.write(angle);
 }

@@ -1,8 +1,11 @@
 #include "SerialCommandInput.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "UartStdio.h"
 
 void SerialCommandInput::init(CommandHandler handler, void* context)
 {
@@ -14,8 +17,12 @@ void SerialCommandInput::init(CommandHandler handler, void* context)
 
 void SerialCommandInput::poll()
 {
-    while (Serial.available() > 0) {
-        const char c = (char)Serial.read();
+    while (UartStdio::available() > 0) {
+        const int readValue = fgetc(stdin);
+        if (readValue < 0) {
+            break;
+        }
+        const char c = (char)readValue;
         if (c == '\r') {
             continue;
         }
@@ -84,6 +91,12 @@ SerialCommandInput::Command SerialCommandInput::parseCommand(char* line) const
     }
 
     if (strcmp(tokens[0], "MOT") == 0 && tokenCount >= 3) {
+        if (strcmp(tokens[1], "POS") == 0) {
+            command.type = MotPos;
+            command.value = atoi(tokens[2]);
+            return command;
+        }
+
         if (strcmp(tokens[1], "SPD") == 0) {
             command.type = MotSpd;
             command.value = atoi(tokens[2]);

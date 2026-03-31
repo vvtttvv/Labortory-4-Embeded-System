@@ -6,7 +6,7 @@ class LcdStatusDisplay {
 public:
     void init(uint8_t rsPin, uint8_t enPin, uint8_t d4Pin, uint8_t d5Pin, uint8_t d6Pin, uint8_t d7Pin);
     void showBoot();
-    void showStatus(bool binaryOn, bool motorForward, int motorRawPercent, int motorAppliedPercent, bool limitAlert);
+    void showStatus(bool binaryOn, int motorRawPercent, int motorAppliedPercent, int motorSpeedPercent, bool limitAlert);
 
 private:
     void clearLine(uint8_t row);

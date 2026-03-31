@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <Servo.h>
 
 class MotorL298 {
 public:
@@ -24,6 +25,8 @@ private:
     uint8_t in1Pin_ = 0;
     uint8_t in2Pin_ = 0;
     uint8_t enPinPwm_ = 0;
+    Servo servo_;
+    bool servoAttached_ = false;
 
     Direction direction_ = Forward;
     int targetPercent_ = 0;

@@ -7,10 +7,8 @@
 #include "UartStdio.h"
 
 namespace {
-constexpr unsigned long kControlPeriodMs = 20;
 constexpr unsigned long kDebounceMs = 60;
 constexpr unsigned long kKeypadDebounceMs = 35;
-constexpr unsigned long kReportPeriodMs = 500;
 constexpr int kMotorRampStepPercent = 2;
 
 constexpr uint8_t kBinaryActuatorPin = 13;
@@ -32,11 +30,12 @@ constexpr char kKeypadMap[4][4] = {
     {'7', '8', '9', 'C'},
     {'*', '0', '#', 'D'},
 };
-} // namespace
+}
 
 void AppController::setup()
 {
     UartStdio::init(9600);
+    stateMutex_ = xSemaphoreCreateMutex();
 
     binaryActuator_.init(kBinaryActuatorPin, true, false);
     motor_.init(kMotorIn1Pin, kMotorIn2Pin, kMotorEnPin);
@@ -48,27 +47,75 @@ void AppController::setup()
     lcd_.showBoot();
 
     printHelp();
+    printf("Scheduler: round-robin task separat\n");
     printStatus();
     updateLcdStatus();
 }
 
 void AppController::loop()
 {
+}
+
+void AppController::taskCommandInput()
+{
+    const unsigned long nowMs = millis();
     serialInput_.poll();
-    keypad_.poll(millis());
+    keypad_.poll(nowMs);
+}
 
-    const unsigned long now = millis();
-    if (now - lastControlMs_ >= kControlPeriodMs) {
-        lastControlMs_ = now;
-        binaryActuator_.update(now, kDebounceMs);
-        runAnalogConditioningAndControl();
-    }
+void AppController::taskBinaryControl()
+{
+    lockState();
+    const unsigned long nowMs = millis();
+    binaryActuator_.update(nowMs, kDebounceMs);
+    unlockState();
+}
 
-    if (now - lastReportMs_ >= kReportPeriodMs) {
-        lastReportMs_ = now;
-        printStatus();
-        updateLcdStatus();
+void AppController::taskAnalogControl()
+{
+    lockState();
+    runAnalogConditioningAndControl();
+    unlockState();
+}
+
+void AppController::taskReporting()
+{
+    lockState();
+    const StatusSnapshot snapshot = makeStatusSnapshotLocked();
+    unlockState();
+
+    printStatus(snapshot);
+    updateLcdStatus(snapshot);
+}
+
+void AppController::lockState()
+{
+    if (stateMutex_ != nullptr) {
+        xSemaphoreTake(stateMutex_, portMAX_DELAY);
     }
+}
+
+void AppController::unlockState()
+{
+    if (stateMutex_ != nullptr) {
+        xSemaphoreGive(stateMutex_);
+    }
+}
+
+AppController::StatusSnapshot AppController::makeStatusSnapshotLocked() const
+{
+    StatusSnapshot snapshot;
+    snapshot.binaryState = binaryActuator_.getState();
+    snapshot.pendingState = binaryActuator_.getPendingState();
+    snapshot.raw = motorRawPercent_;
+    snapshot.sat = motorSatPercent_;
+    snapshot.med = motorMedianPercent_;
+    snapshot.filt = motorFilteredPercent_;
+    snapshot.target = motor_.getTargetPercent();
+    snapshot.applied = motor_.getAppliedPercent();
+    snapshot.speed = motorSpeedPercent_;
+    snapshot.limitAlert = alertLimitReached_;
+    return snapshot;
 }
 
 void AppController::printHelp()
@@ -77,37 +124,50 @@ void AppController::printHelp()
     printf("  HELP\n");
     printf("  STATUS\n");
     printf("  BIN ON|OFF\n");
-    printf("  MOT SPD <0..100>\n");
-    printf("  MOT DIR FWD|REV\n");
+    printf("  MOT POS <0..100>\n");
+    printf("  MOT SPD <1..100>\n");
     printf("Keypad:\n");
-    printf("  A=BIN ON, B=BIN OFF, C=DIR FWD, D=DIR REV\n");
-    printf("  0..9=Speed input, #=Apply speed, *=Clear input\n");
+    printf("  A=BIN ON, B=BIN OFF\n");
+    printf("  C=Target POS, D=Target SPD\n");
+    printf("  0..9=Input, #=Apply target, *=Clear input\n");
 }
 
 void AppController::updateLcdStatus()
 {
-    lcd_.showStatus(
-        binaryActuator_.getState(),
-        motor_.getDirection() == MotorL298::Forward,
-        motorRawPercent_,
-        motor_.getAppliedPercent(),
-        alertLimitReached_);
+    const StatusSnapshot snapshot = makeStatusSnapshotLocked();
+    updateLcdStatus(snapshot);
 }
 
 void AppController::printStatus()
 {
+    const StatusSnapshot snapshot = makeStatusSnapshotLocked();
+    printStatus(snapshot);
+}
+
+void AppController::updateLcdStatus(const StatusSnapshot& snapshot)
+{
+    lcd_.showStatus(
+        snapshot.binaryState,
+        snapshot.raw,
+        snapshot.applied,
+        snapshot.speed,
+        snapshot.limitAlert);
+}
+
+void AppController::printStatus(const StatusSnapshot& snapshot)
+{
     printf(
-        "STAT BIN=%s PENDING=%s MOT_DIR=%s RAW=%d SAT=%d MED=%d FILT=%d TGT=%d APPLIED=%d ALERT_LIMIT=%s\n",
-        binaryActuator_.getState() ? "ON" : "OFF",
-        binaryActuator_.getPendingState() ? "ON" : "OFF",
-        motor_.getDirection() == MotorL298::Forward ? "FWD" : "REV",
-        motorRawPercent_,
-        motorSatPercent_,
-        motorMedianPercent_,
-        motorFilteredPercent_,
-        motor_.getTargetPercent(),
-        motor_.getAppliedPercent(),
-        alertLimitReached_ ? "YES" : "NO");
+    "STAT BIN=%s PENDING=%s POS_RAW=%d POS_SAT=%d POS_MED=%d POS_FILT=%d POS_TGT=%d POS_APPLIED=%d SPD=%d ALERT_LIMIT=%s\n",
+        snapshot.binaryState ? "ON" : "OFF",
+        snapshot.pendingState ? "ON" : "OFF",
+        snapshot.raw,
+        snapshot.sat,
+        snapshot.med,
+        snapshot.filt,
+        snapshot.target,
+        snapshot.applied,
+        snapshot.speed,
+        snapshot.limitAlert ? "YES" : "NO");
 }
 
 void AppController::setMotorRawCommand(int rawPercent)
@@ -115,26 +175,39 @@ void AppController::setMotorRawCommand(int rawPercent)
     motorRawPercent_ = rawPercent;
 }
 
-void AppController::applyKeypadSpeedBuffer()
+void AppController::applyKeypadBuffer()
 {
     if (keypadSpeedLen_ == 0) {
-        printf("KEYPAD speed buffer is empty\n");
+        printf("KEYPAD buffer is empty\n");
         return;
     }
 
     keypadSpeedBuf_[keypadSpeedLen_] = '\0';
-    setMotorRawCommand(atoi(keypadSpeedBuf_));
-    printf("KEYPAD speed apply: %d\n", motorRawPercent_);
+    const int value = atoi(keypadSpeedBuf_);
+
+    if (keypadTarget_ == KeypadTargetPosition) {
+        setMotorRawCommand(value);
+        printf("KEYPAD apply POS: %d\n", motorRawPercent_);
+    } else {
+        motorSpeedPercent_ = SignalConditioning::clampInt(value, 1, 100);
+        printf("KEYPAD apply SPD: %d\n", motorSpeedPercent_);
+    }
+
+    keypadSpeedLen_ = 0;
+    keypadSpeedBuf_[0] = '\0';
 }
 
 void AppController::handleKeypadKey(char key)
 {
+    lockState();
+
     if (key >= '0' && key <= '9') {
         if (keypadSpeedLen_ < 3) {
             keypadSpeedBuf_[keypadSpeedLen_++] = key;
             keypadSpeedBuf_[keypadSpeedLen_] = '\0';
-            printf("KEYPAD speed buf: %s\n", keypadSpeedBuf_);
+            printf("KEYPAD buf (%s): %s\n", keypadTarget_ == KeypadTargetPosition ? "POS" : "SPD", keypadSpeedBuf_);
         }
+        unlockState();
         return;
     }
 
@@ -148,24 +221,30 @@ void AppController::handleKeypadKey(char key)
         printf("ACK BIN OFF (keypad)\n");
         break;
     case 'C':
-        motor_.setDirection(MotorL298::Forward);
-        printf("ACK MOT DIR FWD (keypad)\n");
+        keypadTarget_ = KeypadTargetPosition;
+        keypadSpeedLen_ = 0;
+        keypadSpeedBuf_[0] = '\0';
+        printf("KEYPAD target POS\n");
         break;
     case 'D':
-        motor_.setDirection(MotorL298::Reverse);
-        printf("ACK MOT DIR REV (keypad)\n");
+        keypadTarget_ = KeypadTargetSpeed;
+        keypadSpeedLen_ = 0;
+        keypadSpeedBuf_[0] = '\0';
+        printf("KEYPAD target SPD\n");
         break;
     case '#':
-        applyKeypadSpeedBuffer();
+        applyKeypadBuffer();
         break;
     case '*':
         keypadSpeedLen_ = 0;
         keypadSpeedBuf_[0] = '\0';
-        printf("KEYPAD speed buffer cleared\n");
+        printf("KEYPAD buffer cleared\n");
         break;
     default:
         break;
     }
+
+    unlockState();
 }
 
 void AppController::runAnalogConditioningAndControl()
@@ -181,11 +260,15 @@ void AppController::runAnalogConditioningAndControl()
     motorFilteredPercent_ = SignalConditioning::weightedAverageInt(motorFilteredPercent_, motorMedianPercent_, 1, 4);
 
     motor_.setTargetPercent(motorFilteredPercent_);
-    motor_.updateRamp(kMotorRampStepPercent);
+    const int speedClamped = SignalConditioning::clampInt(motorSpeedPercent_, 1, 100);
+    const int dynamicRampStep = map(speedClamped, 1, 100, 1, 10);
+    motor_.updateRamp(dynamicRampStep > 0 ? dynamicRampStep : kMotorRampStepPercent);
 }
 
 void AppController::handleSerialCommand(const SerialCommandInput::Command& command)
 {
+    lockState();
+
     switch (command.type) {
     case SerialCommandInput::Help:
         printHelp();
@@ -201,23 +284,25 @@ void AppController::handleSerialCommand(const SerialCommandInput::Command& comma
         binaryActuator_.requestState(false, millis());
         printf("ACK BIN OFF\n");
         break;
-    case SerialCommandInput::MotSpd:
+    case SerialCommandInput::MotPos:
         setMotorRawCommand(command.value);
-        printf("ACK MOT SPD RAW %d\n", motorRawPercent_);
+        printf("ACK MOT POS RAW %d\n", motorRawPercent_);
+        break;
+    case SerialCommandInput::MotSpd:
+        motorSpeedPercent_ = SignalConditioning::clampInt(command.value, 1, 100);
+        printf("ACK MOT SPD %d\n", motorSpeedPercent_);
         break;
     case SerialCommandInput::MotDirFwd:
-        motor_.setDirection(MotorL298::Forward);
-        printf("ACK MOT DIR FWD\n");
-        break;
     case SerialCommandInput::MotDirRev:
-        motor_.setDirection(MotorL298::Reverse);
-        printf("ACK MOT DIR REV\n");
+        printf("WARN MOT DIR ignored for servo mode. Use MOT POS and MOT SPD\n");
         break;
     case SerialCommandInput::Unknown:
     default:
         printf("ERR Unknown command. Type HELP\n");
         break;
     }
+
+    unlockState();
 }
 
 void AppController::keypadEventThunk(char key, void* context)

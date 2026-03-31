@@ -29,4 +29,10 @@ void UartStdio::init(unsigned long baud)
     fdev_setup_stream(&uart_in, NULL, uart_getchar, _FDEV_SETUP_READ);
     stdout = &uart_out;
     stdin = &uart_in;
+    stderr = &uart_out;
+}
+
+int UartStdio::available()
+{
+    return Serial.available();
 }
