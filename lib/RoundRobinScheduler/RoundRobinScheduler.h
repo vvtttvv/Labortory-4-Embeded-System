@@ -20,8 +20,11 @@ private:
         TickType_t lastRun;
     };
 
-    static void schedulerTaskThunk(void* context);
-    void schedulerTask();
+    static void controlTaskThunk(void* context);
+    static void reportTaskThunk(void* context);
+    void controlTask();
+    void reportTask();
 
     AppController& app_;
+    bool reportDedicatedTaskActive_ = false;
 };

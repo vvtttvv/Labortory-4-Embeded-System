@@ -5,13 +5,24 @@
 #include <stdio.h>
 
 namespace {
-constexpr TickType_t kTick1Ms = pdMS_TO_TICKS(1);
-constexpr TickType_t kInputPeriod = pdMS_TO_TICKS(10);
-constexpr TickType_t kBinaryPeriod = pdMS_TO_TICKS(50);
-constexpr TickType_t kAnalogPeriod = pdMS_TO_TICKS(50);
-constexpr TickType_t kReportPeriod = pdMS_TO_TICKS(500);
-constexpr uint16_t kSchedulerStackWords = 384;
-constexpr UBaseType_t kSchedulerPriority = 2;
+static TickType_t msToTicksCeil(uint16_t ms)
+{
+    const TickType_t ticks = pdMS_TO_TICKS(ms);
+    if (ticks == 0) {
+        return 1;
+    }
+    return ticks;
+}
+
+constexpr TickType_t kMinDelayTick = 1;
+const TickType_t kInputPeriod = msToTicksCeil(10);
+const TickType_t kBinaryPeriod = msToTicksCeil(50);
+const TickType_t kAnalogPeriod = msToTicksCeil(50);
+const TickType_t kReportPeriod = msToTicksCeil(500);
+constexpr uint16_t kControlStackWords = 320;
+constexpr uint16_t kReportStackWords = 224;
+constexpr UBaseType_t kControlPriority = 3;
+constexpr UBaseType_t kReportPriority = 1;
 }
 
 RoundRobinScheduler::RoundRobinScheduler(AppController& app)
@@ -21,40 +32,67 @@ RoundRobinScheduler::RoundRobinScheduler(AppController& app)
 
 void RoundRobinScheduler::start()
 {
-    const BaseType_t result = xTaskCreate(
-        schedulerTaskThunk,
-        "RR_SCHED",
-        kSchedulerStackWords,
+    BaseType_t result = xTaskCreate(
+        controlTaskThunk,
+        "CTRL_SCHED",
+        kControlStackWords,
         this,
-        kSchedulerPriority,
+        kControlPriority,
         nullptr);
 
     if (result != pdPASS) {
-        printf("ERR scheduler create failed: RR_SCHED\n");
+        printf("ERR scheduler create failed: CTRL_SCHED\n");
     } else {
-        printf("OK scheduler task: RR_SCHED\n");
+        printf("OK scheduler task: CTRL_SCHED\n");
+    }
+
+    result = xTaskCreate(
+        reportTaskThunk,
+        "REPORT",
+        kReportStackWords,
+        this,
+        kReportPriority,
+        nullptr);
+
+    if (result != pdPASS) {
+        reportDedicatedTaskActive_ = false;
+        printf("WARN REPORT task create failed, fallback to control scheduler\n");
+    } else {
+        reportDedicatedTaskActive_ = true;
+        printf("OK scheduler task: REPORT\n");
     }
 }
 
-void RoundRobinScheduler::schedulerTaskThunk(void* context)
+void RoundRobinScheduler::controlTaskThunk(void* context)
 {
     RoundRobinScheduler* self = static_cast<RoundRobinScheduler*>(context);
     if (self != nullptr) {
-        self->schedulerTask();
+        self->controlTask();
     }
 
     vTaskDelete(nullptr);
 }
 
-void RoundRobinScheduler::schedulerTask()
+void RoundRobinScheduler::reportTaskThunk(void* context)
+{
+    RoundRobinScheduler* self = static_cast<RoundRobinScheduler*>(context);
+    if (self != nullptr) {
+        self->reportTask();
+    }
+
+    vTaskDelete(nullptr);
+}
+
+void RoundRobinScheduler::controlTask()
 {
     const TickType_t startTick = xTaskGetTickCount();
     TaskSlot tasks[] = {
         {&AppController::taskCommandInput, kInputPeriod, startTick},
         {&AppController::taskBinaryControl, kBinaryPeriod, startTick},
         {&AppController::taskAnalogControl, kAnalogPeriod, startTick},
-        {&AppController::taskReporting, kReportPeriod, startTick},
     };
+
+    TickType_t fallbackReportLastRun = startTick;
 
     while (true) {
         const TickType_t now = xTaskGetTickCount();
@@ -66,6 +104,22 @@ void RoundRobinScheduler::schedulerTask()
             }
         }
 
-        vTaskDelay(kTick1Ms);
+        if (!reportDedicatedTaskActive_ && ((now - fallbackReportLastRun) >= kReportPeriod)) {
+            fallbackReportLastRun = now;
+            app_.taskReporting();
+        }
+
+        // Always block at least one RTOS tick to let lower-priority tasks run.
+        vTaskDelay(kMinDelayTick);
+    }
+}
+
+void RoundRobinScheduler::reportTask()
+{
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (true) {
+        app_.taskReporting();
+        vTaskDelayUntil(&lastWake, kReportPeriod);
     }
 }
